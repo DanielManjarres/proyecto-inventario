@@ -1,8 +1,7 @@
 import { Sequelize } from "sequelize";
+import 'dotenv/config';
 
-const dbUrl = process.env.MYSQL_URL || process.env.DATABASE_URL;
-
-const sequelize = new Sequelize(dbUrl, {
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "mysql",
   logging: false,
 });
