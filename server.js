@@ -21,3 +21,17 @@ async function start() {
 }
 
 start();
+
+// SOLO PARA EL PRIMER DEPLOY EN RAILWAY
+if (process.env.RAILWAY_ENVIRONMENT) {
+  console.log("Ejecutando sincronización automática en Railway...");
+  sequelize.sync({ force: true }).then(async () => {
+    console.log("Tablas creadas en Railway");
+    await sequelize.models.Category.findOrCreate({
+      where: { name: "General" }
+    });
+    console.log("Categoría inicial creada");
+  }).catch(err => {
+    console.error("Error al crear tablas en Railway:", err.message);
+  });
+}
