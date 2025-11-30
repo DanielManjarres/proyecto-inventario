@@ -1,9 +1,10 @@
 import { Sequelize } from "sequelize";
 
-const sequelize = new Sequelize(process.env.MYSQL_URL, {
+const dbUrl = process.env.MYSQL_URL || process.env.DATABASE_URL;
+
+const sequelize = new Sequelize(dbUrl, {
   dialect: "mysql",
-  logging: false
+  logging: false,
 });
 
 export default sequelize;
-    
