@@ -1,19 +1,12 @@
 import { Router } from "express";
-import sequelize from "../config/database.js";
+import categoryRoutes from "./category.routes.js";
+import productRoutes from "./product.routes.js";
 
 const router = Router();
 
-router.get("/status", (req, res) => {
-  res.json({ message: "API Inventario funcionando" });
-});
+router.get("/status", (req, res) => res.json({ message: "API Inventario OK" }));
 
-router.get("/db-test", async (req, res) => {
-  try {
-    await sequelize.authenticate();
-    res.json({ status: "ok", message: "DB conectada" });
-  } catch (error) {
-    res.status(500).json({ status: "error", error: error.message });
-  }
-});
+router.use("/categories", categoryRoutes);
+router.use("/products", productRoutes);
 
 export default router;
