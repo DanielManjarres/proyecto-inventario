@@ -1,2 +1,15 @@
+# node modules
 node_modules/
+npm-debug.log
+yarn-error.log
+
+# environment
 .env
+.env.local
+
+# logs
+logs
+*.log
+
+# vscode
+.vscode/
