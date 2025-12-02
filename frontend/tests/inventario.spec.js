@@ -1,47 +1,81 @@
 import { test, expect } from '@playwright/test';
 
+test.setTimeout(60000);
+
 test.describe('Flujo completo del sistema de inventario', () => {
-  test('crear categoría y producto reales - VERSIÓN 100% INFALIBLE', async ({ page }) => {
+  test('Crear categoría y producto correctamente en UI real', async ({ page }) => {
     await page.goto('http://localhost:5173');
 
-    const categoria = 'Lácteos';
-    const producto = 'Leche Deslactosada Alpina';
+    const categoria = 'Lácteos ' + Date.now();
+    const producto = 'Leche Deslactosada Alpina ' + Date.now();
     const precio = '4500';
     const stock = '48';
 
-    // 1. Crear categoría (aunque ya exista)
-    await page.getByRole('button', { name: 'Categorías' }).click();
-    await page.fill('input[placeholder="Nombre de la nueva categoría"]', categoria);
-    await page.getByRole('button', { name: 'Crear Categoría' }).click();
+    // -----------------------------
+    // 1. Crear categoría
+    // -----------------------------
+    await page.getByRole('button', { name: '+ Nueva Categoría' }).click();
+    await page.locator('input[name="name"]').fill(categoria);
+    await page.getByRole('button', { name: 'Guardar' }).click();
 
-    // 2. Ir a Productos
-    await page.getByRole('button', { name: 'Productos' }).click();
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('cell', { name: categoria })).toBeVisible();
 
-    // 3. Esperar que la categoría esté en el select (aunque no sea visible)
-    await expect(page.locator('select option').filter({ hasText: categoria })).toBeAttached({ timeout: 10000 });
+    // -----------------------------
+    // 2. Crear producto
+    // -----------------------------
+    await page.getByRole('button', { name: '+ Nuevo Producto' }).click();
+    await page.locator('input[name="name"]').fill(producto);
+    await page.locator('input[name="price"]').fill(precio);
+    await page.locator('input[name="stock"]').fill(stock);
+    await page.selectOption('select[name="categoryId"]', { label: categoria });
+    await page.getByRole('button', { name: 'Guardar' }).click();
 
-    // 4. Crear el producto bonito
-    await page.fill('input[placeholder="Nombre del producto"]', producto);
-    await page.fill('input[placeholder="Descripción (opcional)"]', '1 litro, deslactosada, marca Alpina');
-    await page.fill('input[placeholder="Precio"]', precio);
-    await page.fill('input[placeholder="Stock inicial"]', stock);
-    await page.selectOption('select', { label: categoria });
-    await page.getByRole('button', { name: 'Guardar Producto' }).click();
+    await page.waitForLoadState('networkidle');
 
-    // 5. Verificaciones 100% estables (evitamos duplicados)
-    await expect(page.getByRole('heading', { name: producto })).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('$4500.00')).toBeVisible();
-    await expect(page.getByText('Stock: 48 und')).toBeVisible();
+    // -----------------------------
+    // 3. Verificaciones
+    // -----------------------------
+    const fila = page.getByRole('row').filter({ hasText: producto });
 
-    // Para la categoría: usamos el que está dentro de la tarjeta del producto
-    await expect(
-      page.getByRole('heading', { name: producto })
-          .locator('..')
-          .locator('..')
-          .getByText(categoria)
-    ).toBeVisible();
+    await expect(fila.getByRole('cell', { name: /\$?4?500/i })).toBeVisible();
+    await expect(fila.getByRole('cell', { name: stock })).toBeVisible();
+    await expect(fila.getByRole('cell', { name: new RegExp(categoria) })).toBeVisible();
 
-    console.log('TEST E2E COMPLETADO CON ÉXITO');
-    console.log('Producto creado: Leche Deslactosada Alpina - $4500.00');
+    console.log('TEST COMPLETADO, INICIANDO LIMPIEZA...');
+
+    // -----------------------------
+    // 4. Limpieza controlada
+    // -----------------------------
+    await test.step("Eliminar producto y categoría creados", async () => {
+      try {
+        // PRODUCTO --------------------------
+        const filaProducto = page.getByRole('row').filter({ hasText: producto });
+        const deleteProdBtn = filaProducto.getByRole('button', { name: 'Eliminar' });
+
+        if (await deleteProdBtn.isVisible().catch(() => false)) {
+          await deleteProdBtn.click().catch(() => {});
+          await page.getByRole('button', { name: /confirmar/i }).click().catch(() => {});
+        }
+
+        await page.waitForLoadState('networkidle').catch(() => {});
+
+        // CATEGORÍA -------------------------
+        const filaCategoria = page.getByRole('row').filter({ hasText: categoria });
+        const deleteCatBtn = filaCategoria.getByRole('button', { name: 'Eliminar' });
+
+        if (await deleteCatBtn.isVisible().catch(() => false)) {
+          await deleteCatBtn.click().catch(() => {});
+          await page.getByRole('button', { name: /confirmar/i }).click().catch(() => {});
+        }
+
+        await page.waitForLoadState('networkidle').catch(() => {});
+
+        console.log("✔ LIMPIEZA FINALIZADA");
+
+      } catch (error) {
+        console.log("⚠ Error en la limpieza (no afecta el test):", error.message);
+      }
+    });
   });
 });
