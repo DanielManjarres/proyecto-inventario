@@ -8,7 +8,7 @@ import Category from "./category.model.js";
 import Product from "./product.model.js";
 
 // Sincroniza las tablas (solo en desarrollo)
-if (process.env.NODE_ENV !== "production") {
+if (import.meta.env.MODE!== "production") {
   sequelize.sync({ alter: true }).catch(console.error);
 }
 
