@@ -1,0 +1,2 @@
+-- Baseline migration for existing database
+-- This migration is intentionally empty because the database was created manually
