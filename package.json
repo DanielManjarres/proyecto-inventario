@@ -6,7 +6,9 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js backend/tests/unit",
+    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js backend/tests/integration"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +25,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
-    "nodemon": "^3.1.11"
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.11",
+    "supertest": "^6.3.3"
   }
 }
