@@ -19,7 +19,7 @@ test.describe('Flujo completo del sistema de inventario', () => {
     await page.getByRole('button', { name: 'Guardar' }).click();
 
     await page.waitForLoadState('networkidle');
-    await expect(page.getByRole('cell', { name: categoria })).toBeVisible();
+    await expect(page.getByText(categoria, { exact: true })).toBeVisible();
 
     // -----------------------------
     // 2. Crear producto
@@ -34,13 +34,18 @@ test.describe('Flujo completo del sistema de inventario', () => {
     await page.waitForLoadState('networkidle');
 
     // -----------------------------
-    // 3. Verificaciones
+    // 3. Verificaciones (CORREGIDAS)
     // -----------------------------
     const fila = page.getByRole('row').filter({ hasText: producto });
 
-    await expect(fila.getByRole('cell', { name: /\$?4?500/i })).toBeVisible();
-    await expect(fila.getByRole('cell', { name: stock })).toBeVisible();
-    await expect(fila.getByRole('cell', { name: new RegExp(categoria) })).toBeVisible();
+    // Precio
+    await expect(fila.getByText(/\$?4?500/, { exact: false })).toBeVisible();
+
+    // Stock (EVITA STRICT MODE VIOLATION)
+    await expect(fila.getByText(stock, { exact: true })).toBeVisible();
+
+    // Categoría
+    await expect(fila.getByText(new RegExp(categoria), { exact: false })).toBeVisible();
 
     console.log('TEST COMPLETADO, INICIANDO LIMPIEZA...');
 
