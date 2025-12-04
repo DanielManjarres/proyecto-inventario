@@ -1,15 +1,17 @@
-// backend/src/models/index.js
 import sequelize from "../config/database.js";
-import "./category.model.js";
-import "./product.model.js";
-
-// Esto fuerza a que los modelos se registren en sequelize.models
 import Category from "./category.model.js";
 import Product from "./product.model.js";
 
-// Sincroniza las tablas (solo en desarrollo)
-if (process.env.NODE_ENV !== "production") {
-  sequelize.sync({ alter: true }).catch(console.error);
+// Importar modelos para que se registren en sequelize.models
+import "./category.model.js";
+import "./product.model.js";
+
+
+if (process.env.NODE_ENV !== "test") {
+  sequelize
+    .sync({ alter: true })
+    .then(() => console.log("Modelos sincronizados"))
+    .catch((err) => console.error("Sync error:", err));
 }
 
 export { sequelize, Category, Product };
