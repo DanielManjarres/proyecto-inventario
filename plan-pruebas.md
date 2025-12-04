@@ -1,0 +1,27 @@
+# Plan de Pruebas – Sistema de Gestión de Inventario
+
+**Autor**: Daniel Felipe Manjarres  
+**Fecha**: 04 de diciembre de 2025  
+**Resultado global**: 100 % de casos aprobados
+
+| ID | Tipo de Prueba       | Resultado Esperado                                                                                           | Pasos de Ejecución                                                                                                                | Prerrequisitos                                  | Resultado Obtenido       | Estado  |
+|----|----------------------|--------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|--------------------------|---------|
+| 1  | Unitaria             | Array con datos simulados (sin tocar DB real)                                                                | `cd backend && npm run test:unit` → prueba "getAllCategories devuelve lista mockeada"                                              | Jest configurado                                 | OK                       | Passed  |
+| 2  | Unitaria             | Llama al mock de `create` y devuelve objeto con id                                                           | `cd backend && npm run test:unit` → prueba "createCategory llama a prisma.create y devuelve categoría"                              | Jest configurado                                 | OK                       | Passed  |
+| 3  | Integración          | Status 201 + categoría aparece en el listado                                                                 | POST `/api/categories` → `{ "name": "IntegraciónTest" }` → GET `/api/categories`                                                   | MySQL + backend corriendo                        | OK                       | Passed  |
+| 4  | Integración          | Producto creado con relación correcta y `category.name` visible                                              | POST categoría → POST `/api/products` con `categoryId` válido → GET `/api/products`                                                | MySQL + al menos 1 categoría                     | OK                       | Passed  |
+| 5  | Integración          | Status 200 y 204 respectivamente                                                                             | PUT `/api/categories/:id` → DELETE `/api/categories/:id`                                                                           | MySQL + categoría existente                      | OK                       | Passed  |
+| 6  | Integración          | Status 200 y 204 respectivamente                                                                             | PUT `/api/products/:id` → DELETE `/api/products/:id`                                                                                | MySQL + producto existente                       | OK                       | Passed  |
+| 7  | Sistema (E2E)        | Producto “Leche” aparece con precio $4.500 y categoría “Lácteos”                                             | Abrir app → + Nueva Categoría → “Lácteos” → Guardar → + Nuevo Producto → “Leche” → precio 4500 → seleccionar Lácteos → Guardar       | Backend y frontend corriendo                     | OK                       | Passed  |
+| 8  | Sistema (E2E)        | Nombre actualizado y luego desaparece de la tabla                                                            | Crear categoría → Editar → cambiar nombre → Guardar → Eliminar → Confirmar                                                         | Backend y frontend corriendo                     | OK                       | Passed  |
+| 9  | Sistema (E2E)        | Precio actualizado y luego desaparece de la tabla                                                            | Crear producto → Editar → cambiar precio → Guardar → Eliminar → Confirmar                                                          | Backend y frontend corriendo                     | OK                       | Passed  |
+| 10 | Funcional (manual)   | Funciona exactamente igual que en local                                                                     | Abrir https://frontend-production-2351.up.railway.app → realizar todo el flujo CRUD                                         | Deploy activo                                    | OK                       | Passed  |
+| 11 | No funcional         | Todas las respuestas < 500 ms (promedio real: 87 ms)                                                         | 10 peticiones GET `/api/products` en producción                                                                            | Deploy activo + herramienta                      | OK (promedio 87 ms)      | Passed  |
+| 12 | CI/CD                | Pipeline verde → deploy automático a Railway                                                                | Hacer push a `main` → observar GitHub Actions                                                                              | GitHub + Railway                                 | OK                       | Passed  |
+
+### Herramientas utilizadas
+
+- **Jest + Supertest** → unitarias e integración
+- **Playwright** → pruebas de sistema (E2E)
+- **GitHub Actions** → pipeline CI/CD
+- **Railway** → producción
